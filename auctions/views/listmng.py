@@ -41,3 +41,8 @@ def createlisting(request):
     return render(request, 'auctions/createlisting.html', {
         'message' : message
     })
+
+
+@login_required
+def viewuser(request):
+    pass

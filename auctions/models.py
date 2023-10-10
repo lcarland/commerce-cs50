@@ -5,10 +5,19 @@ from django.db import models
 class User(AbstractUser):
     id = models.AutoField(primary_key=True)
     # User info inherited from AbstractUser
-    watching = models.ForeignKey('Listing', on_delete=models.CASCADE, blank=True, null=True)
+    watching = models.ManyToManyField('Listing', blank=True, null=True)
 
     def __str__(self):
         return self.username
+
+class Notification(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    time = models.DateTimeField(auto_now_add=True)
+    message = models.CharField(max_length=500)
+
+    def __str__(self):
+        return f"{self.user} - {self.time}"
 
 
 class Category(models.Model):
@@ -46,7 +55,7 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     replyto = models.CharField(max_length=64)
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user} -> {self.listing}"
