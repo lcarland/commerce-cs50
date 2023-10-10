@@ -1,0 +1,21 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+<h2>Profile Management</h2>
+{% if user.is_authenticated %}
+<ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url '' %}">My Listings</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url '' %}">My Bids</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url '' %}">Comment History</a>
+        </li>
+        <li>
+            <a href="{%  %}"></a>
+        </li>
+    {% endif %}
+</ul>
+{% endblock %}

@@ -1,9 +1,14 @@
 from django.shortcuts import render 
+from django.db import IntegrityError
 
-import re
+from ..models import Listing
 
 
 def createlisting(request):
+    message: str = ""
+
+    #TODO authentication
+
     if request.method == 'POST':
         title = request.POST["title"]
         description = request.POST["description"]
@@ -18,8 +23,17 @@ def createlisting(request):
             if not val:
                 del tags[i]
             
-        #TODO
+        try:
+            listing = Listing.objects.create(title=title, description=description, tags=tags, imgurl=imgurl, startbid=startbid)
+            listing.save()
+        except IntegrityError:
+            render(request, 'auctions/createlisting.html', {
+                'message': "Error submitting listing"
+            })
+        
+        message = "Listing posted"
+
 
     return render(request, 'auctions/createlisting.html', {
-        'message' : ''
+        'message' : message
     })

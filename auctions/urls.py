@@ -1,6 +1,6 @@
 from django.urls import path
 
-from auctions.views import index, usrmngt
+from auctions.views import index, listmng
 
 urlpatterns = [
     path("", index.index, name="index"),
@@ -8,5 +8,5 @@ urlpatterns = [
     path("logout", index.logout_view, name="logout"),
     path("register", index.register, name="register"),
     
-    path("createlistign", usrmngt.createlisting, name="createlisting")
+    path("createlisting", listmng.createlisting, name="createlisting")
 ]

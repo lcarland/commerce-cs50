@@ -10,19 +10,19 @@
     <form action="{% url 'createlisting' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
-            <input class="form-control" autofocus type="text" name="title" placeholder="Title">
+            <input class="form-control" autofocus type="text" name="title" placeholder="Title" required>
         </div>
         <div class="form-group">
-            <input class="form-control" type="text" name="description" placeholder="Description">
+            <input class="form-control" type="text" name="description" placeholder="Description" required>
         </div>
         <div class="form-group">
-            <input class="form-control" type="text" name="tags" placeholder="Tags: Seperate with a comma">
+            <input class="form-control" type="text" name="tags" placeholder="Tags: At least one, seperate additional tags with a comma" required>
         </div>
         <div class="form-group">
             <input class="form-control" type="text" name="imgurl" placeholder="Image URL">
         </div>
         <div class="form-group">
-            <input class="form-control" type="text" name="startbid" placeholder="Starting Bid">
+            <input class="form-control" type="text" name="startbid" placeholder="Starting Bid" required>
         </div>
         <input class="btn btn-primary" type="submit" value="Submit">
     </form>
