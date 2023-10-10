@@ -1,2 +1,3 @@
  - models created
- - create listing in progress
+ - create listing html
+ - create listing view: TODO: get tags from list and insert tags that don't exist into Category table and then relate them to the Listing
