@@ -1,21 +1,30 @@
 {% extends 'auctions/layout.html' %}
 
+{% block styles %}
+{% endblock %}
+
 {% block body %}
 <h2>Profile Management</h2>
 {% if user.is_authenticated %}
 <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link" href="{% url '' %}">My Listings</a>
+            <a class="nav-link" href="{% url 'userlistings' %}">My Listings</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{% url '' %}">My Bids</a>
+            <a class="nav-link" href="{% url 'userbids' %}">My Bids</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{% url '' %}">Comment History</a>
+            <a class="nav-link" href="{% url 'usercomments' %}">Comment History</a>
         </li>
-        <li>
-            <a href="{%  %}"></a>
-        </li>
-    {% endif %}
+
+
+{% endif %}
 </ul>
+    {% block userbody %}
+    {% endblock %}
+
+{% endblock %}
+
+{% block script %}
+
 {% endblock %}

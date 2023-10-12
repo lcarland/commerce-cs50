@@ -1,3 +1,13 @@
 body {
     padding: 10px;
 }
+
+.links {
+    text-decoration: none;
+    color: black;
+}
+
+.links:hover {
+    text-decoration: none;
+    color: black;
+}

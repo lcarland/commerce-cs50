@@ -5,9 +5,10 @@
 
     {% for listing in listings %}
     <h4>{{ listing.title }}</h4>
-    <img src="{{ listing.imgurl }}" alt="">
+    <img src="{{ listing.imgurl }}" alt="No image provided">
     <p>{{ listing.description }}</p>
-    <div><b>Starting Bid: {{ listing.startbid }}</b></div>
+    <div><b>Current Bid: ${{ listing.price }}</b></div>
+    <hr>
     {% endfor %}
 
 {% endblock %}

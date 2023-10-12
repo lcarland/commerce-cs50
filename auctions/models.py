@@ -6,6 +6,9 @@ class User(AbstractUser):
     id = models.AutoField(primary_key=True)
     # User info inherited from AbstractUser
     watching = models.ManyToManyField('Listing', blank=True, null=True)
+    selling_num = models.IntegerField(default=0)
+    sold_num = models.IntegerField(default=0)
+    earnings = models.FloatField(default=0)
 
     def __str__(self):
         return self.username
@@ -31,10 +34,13 @@ class Category(models.Model):
 class Listing(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=64)
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     description = models.CharField(max_length=1000)
     tags = models.ManyToManyField(Category)
-    imgurl = models.CharField(max_length=200, blank=True, null=True)
+    imgurl = models.CharField(max_length=200, null=True, default="/static/auctions/product-placeholder.jpg")
     startbid = models.FloatField()
+    price = models.FloatField(blank=True, default=0)
+    sold = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title

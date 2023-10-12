@@ -9,7 +9,7 @@ from ..models import User, Listing
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all()
+        "listings": Listing.objects.filter(sold=False)
     })
 
 
@@ -66,3 +66,5 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
+def invalidoperation(request, msg: str):
+    pass

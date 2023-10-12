@@ -1,0 +1,22 @@
+{% extends 'auctions/user/layout.html' %}
+
+<!-- Variables:
+    user_listings: List[obj]
+ -->
+{% block userbody %}
+{% for listing in user_listings %}
+<h4>{{ listing.title }}</h4>
+<img src="{{ listing.imgurl }}" alt="No image provided">
+<p>{{ listing.description }}</p>
+<div><b>Current Bid: ${{ listing.price }}</b></div>
+{% if listing.sold %}
+<b>{{ SOLD }}</b>
+{% endif %}
+<div>
+    <button id="acceptBid" type="button" class="btn btn-success nav-item"><a class="links" href="{% url 'listing_operations' %}?id={{ listing.id }}&oper=accept">Accept Bid</a></button>
+    <button id="editListing" type="button" class="btn btn-primary"><a class="links" href="{% url 'listing_operations' %}?id={{ listing.id }}&oper=edit">Edit Listing</a></button>
+    <button id="closeListing" type="button" class="btn btn-danger"><a class="links" href="{% url 'listing_operations' %}?id={{ listing.id }}&oper=close">Close Listing</a></button>
+</div>
+<hr>
+{% endfor %}
+{% endblock %}

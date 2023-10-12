@@ -4,7 +4,6 @@
  - view individual listing:
     - 
  - create user page:
-    - sub menu or everything on one page?
     - user listings
     - bids
     - user comments

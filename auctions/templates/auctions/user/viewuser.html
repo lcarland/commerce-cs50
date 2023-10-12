@@ -1,16 +1,22 @@
 {% extends "auctions/user/layout.html" %}
 
 
-{% block body %}
+{% block userbody %}
 <!-- User stats -->
-
+<ul class="list-unstyled d-flex px-2 py-2">
+    <li class="me3 px-2 py-2">
+        <b>Selling</b>
+        <div>{{ user.selling_num }}</div>
+    </li>
+    <li class="me3 px-2 py-2">
+        <b>Sold</b>
+        <div>{{ user.sold_num }}</div>
+    </li>
+    <li class="me3 px-2 py-2">
+        <b>Earnings</b>
+        <div>${{ user.earnings }}</div>
+    </li>
+</ul>
 <!-- Notifications -->
 
-<!-- User Listings -->
-
-<!-- Watchlist -->
-
-<!-- User bids -->
-
-<!-- User comments -->
 {% endblock %}
