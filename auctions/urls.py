@@ -9,6 +9,7 @@ urlpatterns = [
     path("register", index.register, name="register"),
     
     path("createlisting", listmng.createlisting, name="createlisting"),
+    path("updatelisting", listmng.updatelisting, name="updatelisting"),
     path("user/listing", listmng.listing_operation, name="listing_operations"),
 
     path("user", usermng.viewuser, name="viewuser"),

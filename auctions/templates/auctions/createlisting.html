@@ -1,29 +1,44 @@
 {% extends "auctions/layout.html" %}
 
+<!-- Variables:
+    message - if applicable for errors
+    newlisting - t/f - false for updatelisting
+    id - only if updating listing
+    title
+    description
+    tags - list[str]
+    imgurl
+-->
+
 {% block body %}
     <h2>Create Listing</h2>
 
     {% if message %}
         <div>{{ message }}</div>
     {% endif %}
-
+    {% if newlisting %}
     <form action="{% url 'createlisting' %}" method="post">
+    {% else %}
+    <form action="{% url 'updatelsiting' %}?id={{ id }}&oper=edit" method="post">
+    {% endif %}
         {% csrf_token %}
         <div class="form-group">
-            <input class="form-control" autofocus type="text" name="title" placeholder="Title" required>
+            <input class="form-control" autofocus type="text" name="title" placeholder="Title" value="{{ title }}" required>
         </div>
         <div class="form-group">
-            <input class="form-control" type="text" name="description" placeholder="Description" required>
+            <input class="form-control" type="text" name="description" placeholder="Description" value="{{ description }}" required>
         </div>
         <div class="form-group">
-            <input class="form-control" type="text" name="tags" placeholder="Tags: At least one, seperate additional tags with a comma" required>
+            <input class="form-control" type="text" name="tags" placeholder="Tags: At least one, seperate additional tags with a comma" value="{{ tags }}" required>
         </div>
         <div class="form-group">
-            <input class="form-control" type="text" name="imgurl" placeholder="Image URL">
+            <input class="form-control" type="text" name="imgurl" placeholder="Image URL" value="{{ imgurl }}">
         </div>
+        {% if newlisting %}
         <div class="form-group">
             <input class="form-control" type="text" name="startbid" placeholder="Starting Bid" required>
         </div>
+        {% endif %}
         <input class="btn btn-primary" type="submit" value="Submit">
     </form>
 {% endblock %}

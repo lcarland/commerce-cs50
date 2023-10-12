@@ -11,3 +11,8 @@ body {
     text-decoration: none;
     color: black;
 }
+
+.img-thumb {
+    height: 400px;
+    width: auto;
+}
