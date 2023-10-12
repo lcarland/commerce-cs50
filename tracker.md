@@ -1,3 +1,12 @@
- - models created
- - create listing html
- - create listing view: TODO: get tags from list and insert tags that don't exist into Category table and then relate them to the Listing
+ - models created: x
+ - create listing html: x
+ - create listing view: x
+ - view individual listing:
+    - 
+ - create user page:
+    - sub menu or everything on one page?
+    - user listings
+    - bids
+    - user comments
+    - notifications
+    - watchlist

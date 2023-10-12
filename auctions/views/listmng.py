@@ -45,4 +45,4 @@ def createlisting(request):
 
 @login_required
 def viewuser(request):
-    pass
+    return render(request, 'auctions/user/viewuser.html')
