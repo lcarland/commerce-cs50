@@ -1,9 +1,17 @@
 from django.shortcuts import render, HttpResponseRedirect
+from django.http import HttpResponseNotFound, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.urls import reverse
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 
 from ..models import Listing, Category, Bid
+
+
+def viewlisting(request):
+    listing = validate_listing_query(request)
+    return render(request, 'auctions/viewlisting.html', {
+        'listing': listing
+    })
 
 
 @login_required
@@ -129,8 +137,48 @@ def updatelisting(request):
     #TODO
 
 
+@login_required
+def placebid(request):
+    listing = validate_listing_query(request)
+    user = request.user
+    if listing.seller == user:
+        return HttpResponseNotAllowed('<h1>405 You cannot place a bid on your own listing</h1>')
+    if request.POST["bid"] > listing.price:
+        bid = Bid.objects.create(user=user, amount=request.POST["bid"], listing=listing)
+        bid.save()
+        listing.price = bid.amount 
+        listing.save()
+    else:
+        return HttpResponseBadRequest('<h1>400 The bid amount is too low</h1>')
+
 
 def invalidoperation(request, msg: str):
     return render(request, 'auctions/user/error.html', {
         'msg': msg
     })
+
+
+def getwinningbid(listing_id) -> object:
+    bids = Bid.objects.filter(listing=listing_id)
+    if not bids:
+        return None
+    highest: int = 0
+    for bid in bids:
+        if bid.amount > highest:
+            highest = bid.amount
+            winningbid = bid 
+    return winningbid
+
+
+def validate_listing_query(request):
+    try:
+        list_id = request.GET.get('id')
+        if not list_id:
+            raise KeyError
+        listing = Listing.objects.get(id=list_id)
+    except Listing.DoesNotExist:
+        return HttpResponseNotFound('<h1>404 Listing not found</h1>')
+    except KeyError:
+        return HttpResponseBadRequest('<h1>400 Incorrect URL Parameters</h1>')
+    
+    return listing
