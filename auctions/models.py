@@ -43,7 +43,7 @@ class Listing(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=64)
     seller = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
-    description = models.CharField(max_length=1000)
+    description = models.TextField(max_length=1000)
     tags = models.ManyToManyField(Category)
     imgurl = models.CharField(max_length=200, null=True, default="/static/auctions/product-placeholder.jpg")
     startbid = models.FloatField()

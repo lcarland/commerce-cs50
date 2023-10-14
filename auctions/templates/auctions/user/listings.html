@@ -11,13 +11,33 @@
 <p>{{ listing.description }}</p>
 </a>
 {% if listing.sold %}
-<b>Sold for {{ listing.winningbid }}</b>
+<b>Sold for ${{ listing.price }}</b>
 {% else %}
 <div><b>Current Bid: ${{ listing.price }}</b></div>
-<div>
-    <button id="acceptBid" type="button" class="btn btn-success nav-item"><a class="links" href="{% url 'listing_operations' %}?id={{ listing.id }}&oper=accept">Accept Bid</a></button>
-    <button id="editListing" type="button" class="btn btn-primary"><a class="links" href="{% url 'listing_operations' %}?id={{ listing.id }}&oper=edit">Edit Listing</a></button>
-    <button id="closeListing" type="button" class="btn btn-danger"><a class="links" href="{% url 'listing_operations' %}?id={{ listing.id }}&oper=close">Close Listing</a></button>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <form action="{% url 'listing_operations' %}?id={{ listing.id }}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ listing.id }}">
+                <button class="btn btn-success nav-item" name="oper" value="accept">Accept Bid</button>
+            </form>    
+        </div>
+        <div class="col">
+            <form action="{% url 'listing_operations' %}?id={{ listing.id }}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ listing.id }}">
+                <button class="btn btn-secondary nav-item" name="oper" value="edit">Edit Listing</button>
+            </form>    
+        </div>
+        <div class="col">
+            <form action="{% url 'listing_operations' %}?id={{ listing.id }}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ listing.id }}">
+                <button class="btn btn-danger nav-item" name="oper" value="delete">Remove Listing</button>
+            </form>    
+        </div>
+    </div>    
 </div>
 {% endif %}
 <hr>

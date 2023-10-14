@@ -19,6 +19,10 @@ def userlistings(request):
     })
 
 
+@login_required
+def watchlist(request):
+    pass
+
 
 @login_required
 def userbids(request):
