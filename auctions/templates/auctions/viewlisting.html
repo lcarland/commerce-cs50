@@ -1,0 +1,19 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+
+<a href="" class="links">
+    <h4>{{ listing.title }}</h4>
+    <img src="{{ listing.imgurl }}" class="img-thumb" alt="No image provided">
+    <p>{{ listing.description }}</p>
+    </a>
+    {% if listing.sold %}
+    <b>Sold for {{ listing.price }}</b>
+    {% else %}
+    <div><b>Current Bid: ${{ listing.price }}</b></div>
+    
+    <form action="" method="post">
+
+    </form>
+
+{% endblock %}
