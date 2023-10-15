@@ -11,11 +11,11 @@
     <p>{{ listing.description }}</p>
 
     {% if listing.sold %}
-    <b>Sold for {{ listing.price }}</b>
+    <b>Sold for {{ listing.dollars }}</b>
     {% elif listing.winningbid is None %}
-    <div><b>Starting Bid: ${{ listing.startbid }}</b></div>
+    <div><b>Starting Bid: ${{ listing.dollars }}</b></div>
     {% else %}
-    <div><b>Current Bid: ${{ listing.price }}</b></div>
+    <div><b>Current Bid: ${{ listing.dollars }}</b></div>
     {% endif %}
 
     {% if not listing.sold %}

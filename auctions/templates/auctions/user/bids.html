@@ -7,11 +7,11 @@
 <b><a href="{% url 'viewlisting' %}?id={{ bid.listing.id }}">
     Listing: {{ bid.listing }}
 </a></b>
-<p>Amount: ${{ bid.amount }}</p>
+<p>Amount: ${{ bid.dollars }}</p>
 {% if bid.listing.winningbid == bid %}
 <b>Winning Bid!</b>
 {% else %}
-<b>Not winning, current bid: ${{ bid.listing.winningbid.amount }}</b>
+<b>Not winning, current bid: ${{ bid.listing.winningbid.dollars }}</b>
 {% endif %}
 <hr>
 {% endfor %}

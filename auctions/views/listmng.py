@@ -51,10 +51,21 @@ def createlisting(request):
         startbid: float = request.POST["startbid"]
         seller_id = user
 
+        if not imgurl:
+            imgurl = '/static/auctions/product-placeholder.jpg'
+        startbid = round(startbid, 2)
+
         tags = tags.split(',')
 
         try:
-            listing = Listing.objects.create(title=title, description=description, imgurl=imgurl, seller=seller_id, price=startbid, startbid=startbid)
+            listing = Listing.objects.create(
+                title=title, 
+                description=description, 
+                imgurl=imgurl, 
+                seller=seller_id, 
+                price=startbid, 
+                startbid=startbid
+            )
             listing.save()
 
             user.selling_num += 1
@@ -67,7 +78,8 @@ def createlisting(request):
                 val = val.capitalize()
                 tag, was_created = Category.objects.get_or_create(keyword=val)
 
-            listing.tags.add(tag)
+                listing.tags.add(tag)
+
 
         except IntegrityError:
             render(request, 'auctions/createlisting.html', {
@@ -99,7 +111,6 @@ def listing_operation(request):
     listing = validate_listing_query(request)
   
     if listing.seller != user:
-        print("listing.seller != user")
         return HttpResponseNotAllowed("<h1>405 You are not the owner of this listing</h1>")
     
     operation = request.POST["oper"]
@@ -113,11 +124,11 @@ def listing_operation(request):
         user.selling_num -= 1
         user.sold_num += 1
         user.save()
+        cleantags()
 
     elif operation == 'edit':
         tag_objs = Category.objects.filter(listing=listing)
         tags = [obj.keyword for obj in tag_objs]
-        print(tags)
 
         return render(request, 'auctions/createlisting.html', {
             'message': '',
@@ -130,6 +141,7 @@ def listing_operation(request):
         listing.delete()
         user.selling_num -= 1
         user.save()
+        cleantags()
 
     else:
         raise ValueError
@@ -165,6 +177,8 @@ def updatelisting(request):
 
         listing.tags.add(tag)
 
+        cleantags()
+
     except IntegrityError:
         render(request, 'auctions/createlisting.html', {
             'message': "Error submitting listing",
@@ -196,10 +210,21 @@ def placebid(request):
     return HttpResponseRedirect(f"{reverse('viewlisting')}?id={listing.id}")
 
 
-
+def cleantags() -> None:
+    """Executed on listing update, delete, or accept.
+    Purges tags in 'Category' that are no longer used"""
+    unused_tags = Category.objects.filter(listing__isnull=True).distinct()
+    sold_tags = Category.objects.filter(listing__sold=True).distinct()
+    for _tag in unused_tags:
+        _tag.delete()
+        print("unused tag removed: " + _tag.keyword)
+    for _tag in sold_tags:
+        _tag.delete()
+        print("unused tag removed: " + _tag.keyword)
 
 
 def validate_listing_query(request) -> object: 
+    """For validating a listing"""
     try:
         list_id = request.POST["id"]
         if not list_id:

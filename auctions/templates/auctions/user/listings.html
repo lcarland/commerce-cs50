@@ -11,9 +11,9 @@
 <p>{{ listing.description }}</p>
 </a>
 {% if listing.winningbid is None %}
-<div><b>Starting Bid: ${{ listing.startbid }}</b></div>
+<div><b>Starting Bid: ${{ listing.dollars }}</b></div>
 {% else %}
-<div><b>Current Bid: ${{ listing.price }}</b></div>
+<div><b>Current Bid: ${{ listing.dollars }}</b></div>
 {% endif %}
 
 <div class="container">

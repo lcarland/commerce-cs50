@@ -8,7 +8,7 @@
         <button class="btn btn-dark" type="button">{{ tag }}</button>
     {% else %}
         {% for t in tags %}
-            <button class="btn btn-light" type="submit"><a href="{% url 'index' %}?tag={{t.keyword}}">{{ t.keyword }}</a></button>
+        <a href="{% url 'index' %}?tag={{t.keyword}}"><button class="btn btn-light" type="submit">{{ t.keyword }}</button></a>
         {% endfor %}
     {% endif %}
 
@@ -17,7 +17,11 @@
     <h4>{{ listing.title }}</h4>
     <img src="{{ listing.imgurl }}" class="img-thumb" alt="No image provided">
     <p>{{ listing.description }}</p>
-    <div><b>Current Bid: ${{ listing.price }}</b></div>
+    {% if listing.winningbid is None %}
+        <div><b>Starting Bid: ${{ listing.dollars }}</b></div>
+    {% else %}
+        <div><b>Current Bid: ${{ listing.dollars }}</b></div>
+    {% endif %}
     <hr>
     </a>
     {% endfor %}

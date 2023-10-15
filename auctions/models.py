@@ -9,13 +9,18 @@ class User(AbstractUser):
      User.password """
     id = models.AutoField(primary_key=True)
     # User info inherited from AbstractUser
-    watching = models.ManyToManyField('Listing', blank=True, null=True)
+    watching = models.ManyToManyField('Listing')
     selling_num = models.IntegerField(default=0)
     sold_num = models.IntegerField(default=0)
     earnings = models.FloatField(default=0)
 
     def __str__(self):
         return f"{self.username}"
+    
+    def dollars(self) -> str:
+        """Return price formated to '$X.XX' """
+        return f"{self.earnings:.2f}"
+    
 
 class Notification(models.Model):
     """Contains messages for user generated from server
@@ -45,7 +50,7 @@ class Listing(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     description = models.TextField(max_length=1000)
     tags = models.ManyToManyField(Category)
-    imgurl = models.CharField(max_length=200, null=True, default="/static/auctions/product-placeholder.jpg")
+    imgurl = models.CharField(max_length=200, default="/static/auctions/product-placeholder.jpg")
     startbid = models.FloatField()
     price = models.FloatField(blank=True, default=0)
     winningbid = models.OneToOneField("Bid", on_delete=models.CASCADE, null=True, related_name="winning_bid_for")
@@ -53,6 +58,10 @@ class Listing(models.Model):
 
     def __str__(self):
         return f"{self.title}"
+    
+    def dollars(self) -> str:
+        """Return price formated to '$X.XX' """
+        return f"{self.price:.2f}"
 
 
 class Bid(models.Model):
@@ -66,6 +75,10 @@ class Bid(models.Model):
 
     def __str__(self):
         return f"{self.user} bid {self.amount} on {self.listing}"
+    
+    def dollars(self) -> str:
+        """Return price formated to '$X.XX' """
+        return f"{self.amount:.2f}"
 
 
 class Comment(models.Model):
