@@ -1,5 +1,13 @@
 {% extends 'auctions/user/layout.html' %}
 
-{% block body %}
-
+{% block userbody %}
+<br>
+{% for comment in comments %}
+<b><a href="{% url 'viewlisting' %}?id={{ comment.listing.id }}">
+    Listing: {{ comment.listing }}
+</a></b>
+<b>Date: {{ comment.date }}</b>
+<p>{{ comment.content }}</p>
+<hr>
+{% endfor %}
 {% endblock %}

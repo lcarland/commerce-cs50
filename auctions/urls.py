@@ -17,5 +17,8 @@ urlpatterns = [
     path("user", usermng.viewuser, name="viewuser"),
     path("user/viewlistings", usermng.userlistings, name="userlistings"),
     path("user/bids", usermng.userbids, name="userbids"),
-    path("user/comments", usermng.usercomments, name="usercomments")
+    path("user/comments", usermng.usercomments, name="usercomments"),
+    path("user/postcomment", usermng.postcomment, name="postcomment"),
+    path('user/watchlist', usermng.watchlist, name="watchlist"),
+    path("user/remove_from_watchlist", usermng.rmv_from_watch, name="rmv_from_watch")
 ]

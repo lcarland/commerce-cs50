@@ -4,7 +4,7 @@
     <h2>Active Listings</h2>
 
     {% for listing in listings %}
-    <a href="" class="links">
+    <a href="{% url 'viewlisting' %}?id={{ listing.id }}" class="links">
     <h4>{{ listing.title }}</h4>
     <img src="{{ listing.imgurl }}" class="img-thumb" alt="No image provided">
     <p>{{ listing.description }}</p>

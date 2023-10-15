@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 
-from ..models import Listing, Category, Bid
+from ..models import Listing, Category, Bid, Comment
 
 
 class ListingForm(forms.Form):
@@ -26,9 +26,13 @@ class CreateListingForm(ListingForm):
 
 @require_GET
 def viewlisting(request):
-    listing = validate_listing_query(request)
+    listing = Listing.objects.get(id=request.GET.get("id"))
+
+    comments = Comment.objects.filter(listing=listing)
+
     return render(request, 'auctions/viewlisting.html', {
-        'listing': listing
+        'listing': listing,
+        'comments': comments
     })
 
 
@@ -108,13 +112,15 @@ def listing_operation(request):
         user.save()
 
     elif operation == 'edit':
-        tag_objs = Category.objects.filter(listings__id=user.id)
+        tag_objs = Category.objects.filter(listing=listing)
         tags = [obj.keyword for obj in tag_objs]
+        print(tags)
 
         return render(request, 'auctions/createlisting.html', {
             'message': '',
             'newlisting': False,
-            'form': get_edit_form(listing, tags)
+            'form': get_edit_form(listing, tags),
+            'id': listing.id
         }) 
     
     elif operation == 'delete':
@@ -160,7 +166,8 @@ def updatelisting(request):
         render(request, 'auctions/createlisting.html', {
             'message': "Error submitting listing",
             "newlisting": False,
-            'form': get_edit_form(listing, tags)
+            'form': get_edit_form(listing, tags),
+            'id': listing.id
         })
 
     return HttpResponseRedirect(reverse("userlistings"))
@@ -169,14 +176,17 @@ def updatelisting(request):
 @login_required
 @require_http_methods(['POST'])
 def placebid(request):
-    listing = validate_listing_query(request)
+    listing = Listing.objects.get(id=request.POST["id"])
     user = request.user
+
     if listing.seller == user:
         return HttpResponseNotAllowed('<h1>405 You cannot place a bid on your own listing</h1>')
-    if request.POST["bid"] > listing.price:
+    
+    if float(request.POST["bid"]) > listing.price:
         bid = Bid.objects.create(user=user, amount=request.POST["bid"], listing=listing)
         bid.save()
         listing.price = bid.amount 
+        listing.winningbid = bid
         listing.save()
     else:
         return HttpResponseBadRequest('<h1>400 The bid amount is too low</h1>')
@@ -197,7 +207,7 @@ def getwinningbid(listing_id: int) -> object:
 
 def validate_listing_query(request) -> object: 
     try:
-        list_id = request.GET.get('id')
+        list_id = request.POST["id"]
         if not list_id:
             raise KeyError
         listing = Listing.objects.get(id=list_id)

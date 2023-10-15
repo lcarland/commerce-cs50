@@ -1,0 +1,20 @@
+{% extends 'auctions/user/layout.html' %}
+
+{% block userbody %}
+
+<br>
+{% for listing in watchlist %}
+<a href="{% url 'viewlisting' %}?id={{ listing.id }}" class="links">
+    <h4>{{ listing.title }}</h4>
+    <img src="{{ listing.imgurl }}" class="img-thumb" alt="No image provided">
+    <p>{{ listing.description }}</p>
+</a>
+    {% if listing.sold %}
+    <div><b><i>Sold!</i></b></div>
+    {% elif listing.winningbid is None %}
+    <div><b>Starting Bid: ${{ listing.startbid }}</b></div>
+    {% else %}  
+    <div><b>Current Bid: ${{ listing.price }}</b></div>
+    {% endif %}
+{% endfor %}
+{% endblock %}

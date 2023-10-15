@@ -9,11 +9,52 @@
     </a>
     {% if listing.sold %}
     <b>Sold for {{ listing.price }}</b>
+    {% elif listing.winningbid is None %}
+    <div><b>Starting Bid: ${{ listing.startbid }}</b></div>
     {% else %}
     <div><b>Current Bid: ${{ listing.price }}</b></div>
-    
-    <form action="" method="post">
+    {% endif %}
 
+    {% if not listing.sold %}
+    <br>
+        {% if listing in user.watching.all %}
+        <form action="{% url 'rmv_from_watch' %}" method="post">
+            {% csrf_token %}
+            <button class="btn btn-secondary" name="id" value="{{ listing.id }}">
+                Watched!
+            </button>
+        </form>
+
+        {% elif user.is_authenticated %}
+        <form action="{% url 'watchlist' %}" method="post">
+            {% csrf_token %}
+            <button class="btn btn-primary" name="id" value="{{ listing.id }}">
+                Add to Watchlist
+            </button>
+        </form>
+
+        {% endif %}
+    <br>
+    <form action="{% url 'placebid' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ listing.id }}">
+        <input type="text" name="bid" placeholder="Place Bid">
+        <button class="btn btn-success">Place Bid</button>
     </form>
+    <br>
+    <form action="{% url 'postcomment' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ listing.id }}">
+        <textarea name="content" id="" cols="60" rows="5" placeholder="Write a comment here"></textarea>
+        <button class="btn btn-light">Post Comment</button>
+    </form>
+
+    {% endif %}
+
+{% for reply in comments %}
+<b>{{ reply.user }} - {{ reply.date }}</b>
+<p>{{ reply.content }}</p>
+<hr>
+{% endfor %}
 
 {% endblock %}

@@ -5,15 +5,17 @@
  -->
 {% block userbody %}
 {% for listing in user_listings %}
-<a href="" class="links">
+<a href="{% url 'viewlisting' %}?id={{ listing.id }}" class="links">
 <h4>{{ listing.title }}</h4>
 <img src="{{ listing.imgurl }}" class="img-thumb" alt="No image provided">
 <p>{{ listing.description }}</p>
 </a>
-{% if listing.sold %}
-<b>Sold for ${{ listing.price }}</b>
+{% if listing.winningbid is None %}
+<div><b>Starting Bid: ${{ listing.startbid }}</b></div>
 {% else %}
 <div><b>Current Bid: ${{ listing.price }}</b></div>
+{% endif %}
+
 <div class="container">
     <div class="row">
         <div class="col">
@@ -39,7 +41,14 @@
         </div>
     </div>    
 </div>
-{% endif %}
 <hr>
+{% endfor %}
+{% for listing in sold_listings %}
+<a href="" class="links">
+<h4>{{ listing.title }}</h4>
+<img src="{{ listing.imgurl }}" class="img-thumb" alt="No image provided">
+<p>{{ listing.description }}</p>
+</a>
+<b>Sold for ${{ listing.price }}</b>
 {% endfor %}
 {% endblock %}

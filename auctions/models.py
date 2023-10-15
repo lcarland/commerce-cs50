@@ -48,6 +48,7 @@ class Listing(models.Model):
     imgurl = models.CharField(max_length=200, null=True, default="/static/auctions/product-placeholder.jpg")
     startbid = models.FloatField()
     price = models.FloatField(blank=True, default=0)
+    winningbid = models.OneToOneField("Bid", on_delete=models.CASCADE, null=True, related_name="winning_bid_for")
     sold = models.BooleanField(default=False)
 
     def __str__(self):
@@ -74,8 +75,9 @@ class Comment(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    replyto = models.CharField(max_length=64, blank=True)
+    replyto = models.CharField(max_length=64, null=True)
     date = models.DateTimeField(auto_now_add=True)
+    content = models.CharField(max_length=1000)
 
     def __str__(self):
         return f"{self.user} -> {self.listing}"
