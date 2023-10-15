@@ -3,6 +3,15 @@
 {% block body %}
     <h2>Active Listings</h2>
 
+    {% if tag %}
+        <a href="{% url 'index' %}">&#60;back</a>
+        <button class="btn btn-dark" type="button">{{ tag }}</button>
+    {% else %}
+        {% for t in tags %}
+            <button class="btn btn-light" type="submit"><a href="{% url 'index' %}?tag={{t.keyword}}">{{ t.keyword }}</a></button>
+        {% endfor %}
+    {% endif %}
+
     {% for listing in listings %}
     <a href="{% url 'viewlisting' %}?id={{ listing.id }}" class="links">
     <h4>{{ listing.title }}</h4>

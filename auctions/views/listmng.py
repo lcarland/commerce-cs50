@@ -27,11 +27,12 @@ class CreateListingForm(ListingForm):
 @require_GET
 def viewlisting(request):
     listing = Listing.objects.get(id=request.GET.get("id"))
-
+    tags = Category.objects.filter(listing=listing)
     comments = Comment.objects.filter(listing=listing)
 
     return render(request, 'auctions/viewlisting.html', {
         'listing': listing,
+        'tags': tags,
         'comments': comments
     })
 
@@ -104,6 +105,8 @@ def listing_operation(request):
     operation = request.POST["oper"]
 
     if operation == 'accept':
+        if not listing.winningbid:
+            return HttpResponseRedirect(reverse('userlistings'))
         listing.sold = True
         listing.save()
         user.earnings += listing.price 
@@ -193,16 +196,7 @@ def placebid(request):
     return HttpResponseRedirect(f"{reverse('viewlisting')}?id={listing.id}")
 
 
-def getwinningbid(listing_id: int) -> object:
-    bids = Bid.objects.filter(listing=listing_id)
-    if not bids:
-        return None
-    highest: int = 0
-    for bid in bids:
-        if bid.amount > highest:
-            highest = bid.amount
-            winningbid = bid 
-    return winningbid
+
 
 
 def validate_listing_query(request) -> object: 

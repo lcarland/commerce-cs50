@@ -4,12 +4,22 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from ..models import User, Listing
+from ..models import User, Listing, Category
 
 
 def index(request):
+    _tag = request.GET.get('tag')
+    if _tag:
+        tag = Category.objects.get(keyword=_tag)
+        listings = Listing.objects.filter(tags=tag, sold=False)
+        return render(request, 'auctions/index.html', {
+            'tag': _tag,
+            'listings': listings
+        })
+    
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.filter(sold=False)
+        "listings": Listing.objects.filter(sold=False),
+        "tags": Category.objects.all()
     })
 
 
