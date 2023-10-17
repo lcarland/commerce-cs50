@@ -162,6 +162,9 @@ class ModelTest(TestCase):
         listing = listmng.validate_listing_query(request)
         self.assertEqual(listing, self.listing2)
 
+        request.POST = {"id": "3"}
+        self.assertNotEqual(self.listing3, listmng.validate_listing_query(request))
+
 
 
 
