@@ -104,11 +104,7 @@ class ModelTest(TestCase):
 
     def test_createlisting(self):
         self.client.login(username="user1", password="1234")
-        resp = self.client.post(reverse('createlisting'), {
-            "title": "Test Product 4", "description": "This is a test product",
-            "tags": "hightag, lowtag, purpletag",
-            "imgurl": "http://example.com/image.jpg", "startbid": "16.99"
-        })
+        
         self.assertRedirects(resp, reverse('userlistings'))
         listing4 = Listing.objects.get(title="Test Product 4")
         tags = Category.objects.filter(listing=listing4)
@@ -122,7 +118,25 @@ class ModelTest(TestCase):
         with_missing_url = Listing.objects.get(title="Test5")
         imgurl = with_missing_url.imgurl
         self.assertEqual("/static/auctions/product-placeholder.jpg", imgurl)
-    
+
+
+    def test_listing_operation(self):
+        """Testing listing operations for accepting, editing, and deleting listing"""
+        self.client.login(username="user1", password="1234")
+        Listing.objects.create(
+            title="Product 25", seller=self.u1,
+            description="enter description here", imgurl="https://www.image2.com",
+            startbid=14.00, price=14.00
+        )
+        Listing.objects.create(
+            title="Product 67", seller=self.u1,
+            description="enter description here", imgurl="https://www.image2.com",
+            startbid=14.00, price=14.00
+        )
+        id = Listing.objects.get(title="Product 25").id
+        resp = self.client.post(f"{reverse('listing_operations')}?id={id}", {"oper", "accept"})
+        self.assertEqual(200, resp.status_code)
+
 
     def test_tag_str_to_db(self):
         listing = Mock()
@@ -137,11 +151,11 @@ class ModelTest(TestCase):
     def test_tag_deleted(self):
         """Checking that cleantags() will purge tags in Catergories
         that don't belong to a listing or to one that has sold."""
-        # ['Lions','Tigers','Bears','Foo','Bar']
         def tag_query():
             return Category.objects.filter(
                 Q(listing__isnull=True) | Q(listing__sold=True)
             )
+        # ['Lions','Tigers','Bears','Foo','Bar']
         tag_objs = self.generate_tags()
         self.listing1.tags.add(tag_objs[0])
         self.listing1.tags.add(tag_objs[1])
@@ -162,8 +176,14 @@ class ModelTest(TestCase):
         listing = listmng.validate_listing_query(request)
         self.assertEqual(listing, self.listing2)
 
-        request.POST = {"id": "3"}
-        self.assertNotEqual(self.listing3, listmng.validate_listing_query(request))
+        request.POST["id"] = "3"
+        self.assertEqual(405, listmng.validate_listing_query(request).status_code)
+
+        request.POST["id"] = "100"
+        self.assertEqual(404, listmng.validate_listing_query(request).status_code)
+
+        request.POST = {"a": "2"}
+        self.assertEqual(400, listmng.validate_listing_query(request).status_code)
 
 
 

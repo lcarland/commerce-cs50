@@ -103,9 +103,6 @@ def listing_operation(request):
     user = request.user
     listing = validate_listing_query(request)
   
-    if listing.seller != user:
-        return HttpResponseNotAllowed("<h1>405 You are not the owner of this listing</h1>")
-    
     operation = request.POST["oper"]
 
     if operation == 'accept':
@@ -137,7 +134,7 @@ def listing_operation(request):
         cleantags()
 
     else:
-        raise ValueError
+        return HttpResponseBadRequest("<h1>400 Bad Request</h1>")
 
     return HttpResponseRedirect(reverse("viewuser"))
 
