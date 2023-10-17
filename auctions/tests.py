@@ -4,7 +4,7 @@ from django.db.models import Q
 from unittest.mock import patch, Mock
 
 from auctions.views import listmng
-from .models import Listing, User, Category
+from .models import Listing, User, Category, Bid
 
 
 # Create your tests here.
@@ -104,9 +104,13 @@ class ModelTest(TestCase):
 
     def test_createlisting(self):
         self.client.login(username="user1", password="1234")
-        
+        resp = self.client.post(reverse('createlisting'), {
+            "title": "Test4", "description": "This is a test product",
+            "tags": "hightag, lowtag, purpletag",
+            "imgurl": "exampleimage.com", "startbid": "16.99"
+        })
         self.assertRedirects(resp, reverse('userlistings'))
-        listing4 = Listing.objects.get(title="Test Product 4")
+        listing4 = Listing.objects.get(title="Test4")
         tags = Category.objects.filter(listing=listing4)
         self.assertEqual(3, len(tags))
 
@@ -123,19 +127,27 @@ class ModelTest(TestCase):
     def test_listing_operation(self):
         """Testing listing operations for accepting, editing, and deleting listing"""
         self.client.login(username="user1", password="1234")
-        Listing.objects.create(
+        tags = self.generate_tags()
+        newlist1 = Listing.objects.create(
             title="Product 25", seller=self.u1,
             description="enter description here", imgurl="https://www.image2.com",
             startbid=14.00, price=14.00
         )
-        Listing.objects.create(
+        bid = Bid.objects.create(user=self.u1, amount=16.00, listing=newlist1)
+        newlist1.winningbid = bid
+        newlist1.tags.add(tags[0])
+        newlist1.save()
+        newlist2 = Listing.objects.create(
             title="Product 67", seller=self.u1,
             description="enter description here", imgurl="https://www.image2.com",
             startbid=14.00, price=14.00
         )
+        newlist2.tags.add(tags[1])
         id = Listing.objects.get(title="Product 25").id
-        resp = self.client.post(f"{reverse('listing_operations')}?id={id}", {"oper", "accept"})
-        self.assertEqual(200, resp.status_code)
+        resp = self.client.post(f"{reverse('listing_operations')}", 
+            {"oper": "accept", "id": id})
+        self.assertEqual(302, resp.status_code)
+        self.assertTemplateUsed('auctions/user/viewuser.html')
 
 
     def test_tag_str_to_db(self):
