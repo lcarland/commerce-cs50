@@ -2,6 +2,7 @@ from django.shortcuts import render, HttpResponseRedirect
 from django.http import HttpResponseNotFound, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.urls import reverse
 from django import forms
+from django.db.models import Q
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
@@ -53,7 +54,7 @@ def createlisting(request):
 
         if not imgurl:
             imgurl = '/static/auctions/product-placeholder.jpg'
-        startbid = round(startbid, 2)
+        startbid = round(float(startbid), 2)
 
         tags = tags.split(',')
 
@@ -162,22 +163,12 @@ def updatelisting(request):
     listing.description = request.POST["description"]
     listing.imgurl = request.POST["imgurl"]
 
-    tags = request.POST["tags"] # type str -> list
-    tags = tags.split(',')
+    tags = request.POST["tags"]
 
     try:
         listing.save()
 
-        for val in tags:
-            val = val.strip()
-            if not val:
-                continue
-            val = val.capitalize()
-            tag, was_created = Category.objects.get_or_create(keyword=val)
-
-        listing.tags.add(tag)
-
-        cleantags()
+        tag_str_to_db(tags, listing)
 
     except IntegrityError:
         render(request, 'auctions/createlisting.html', {
@@ -210,17 +201,41 @@ def placebid(request):
     return HttpResponseRedirect(f"{reverse('viewlisting')}?id={listing.id}")
 
 
-def cleantags() -> None:
+def tag_str_to_db(tags:str, listing:object, testing=False):
+    tags = tags.split(',')
+
+    if testing:
+        created_tags:[str] = []
+
+    for val in tags:
+        val = val.strip()
+        if not val:
+            continue
+        val = val.capitalize()
+        tag, was_created = Category.objects.get_or_create(keyword=val)
+        listing.tags.add(tag)
+
+        if testing:
+            created_tags.append(tag.__str__())
+
+    cleantags()
+
+    if testing:
+        return created_tags
+
+
+def cleantags(testing=False) -> None:
     """Executed on listing update, delete, or accept.
     Purges tags in 'Category' that are no longer used"""
-    unused_tags = Category.objects.filter(listing__isnull=True).distinct()
-    sold_tags = Category.objects.filter(listing__sold=True).distinct()
+    unused_tags = Category.objects.filter(Q(listing__isnull=True) | Q(listing__sold=True))
     for _tag in unused_tags:
         _tag.delete()
-        print("unused tag removed: " + _tag.keyword)
-    for _tag in sold_tags:
-        _tag.delete()
-        print("unused tag removed: " + _tag.keyword)
+
+    if testing:
+        deleted_tags = []
+        for _tag in unused_tags:
+            deleted_tags.append(_tag.__str__())
+        return deleted_tags
 
 
 def validate_listing_query(request) -> object: 
