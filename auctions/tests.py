@@ -1,5 +1,6 @@
 from django.test import TestCase, RequestFactory, Client  
 from django.urls import reverse  
+from django.db.models import Q
 from unittest.mock import patch, Mock
 
 from auctions.views import listmng
@@ -78,10 +79,27 @@ class ModelTest(TestCase):
         self.assertTemplateUsed(resp, "auctions/register.html")
 
 
-    def test_valid_login(self):
+    def test_login(self):
         resp = self.client.post(reverse('login'), {"username":"user1","password":"1234"})
         self.assertRedirects(resp, reverse('index'))
         self.assertEqual(resp.wsgi_request.user, self.u1)
+
+        resp = self.client.post(reverse('login'), {"username":"user1","password":"123"})
+        self.assertTemplateUsed(resp, "auctions/login.html")
+
+
+    def test_logout(self):
+        self.client.login(username="user1", password="1234")
+        resp = self.client.get(reverse('logout'))
+        self.assertNotEqual(resp.wsgi_request.user, self.u1)
+
+
+    def test_view_listing(self):
+        resp = self.client.get(f"{reverse('viewlisting')}?id=1")
+        self.assertTemplateUsed(resp, "auctions/viewlisting.html")
+
+        resp = self.client.get(f"{reverse('viewlisting')}?id=100")
+        self.assertEqual(404, resp.status_code)
 
 
     def test_createlisting(self):
@@ -92,28 +110,57 @@ class ModelTest(TestCase):
             "imgurl": "http://example.com/image.jpg", "startbid": "16.99"
         })
         self.assertRedirects(resp, reverse('userlistings'))
+        listing4 = Listing.objects.get(title="Test Product 4")
+        tags = Category.objects.filter(listing=listing4)
+        self.assertEqual(3, len(tags))
+
+        resp = self.client.post(reverse('createlisting'), {
+            "title": "Test5", "description": "This is a test product",
+            "tags": "hightag, lowtag, purpletag",
+            "imgurl": "", "startbid": "16.99"
+        })
+        with_missing_url = Listing.objects.get(title="Test5")
+        imgurl = with_missing_url.imgurl
+        self.assertEqual("/static/auctions/product-placeholder.jpg", imgurl)
     
 
     def test_tag_str_to_db(self):
         listing = Mock()
-        tags = "foo, bar"
-        created_tags = listmng.tag_str_to_db(tags, listing, True)
-        self.assertListEqual(['Foo','Bar'], created_tags)
+        tags = "foo, bar,, help,"
+        listmng.tag_str_to_db(tags, listing)
+        tag_query = Category.objects.filter(
+            Q(keyword="Foo") | Q(keyword="Bar") | Q(keyword="Help")
+        )
+        self.assertEqual(3, len(tag_query))
 
 
     def test_tag_deleted(self):
         """Checking that cleantags() will purge tags in Catergories
         that don't belong to a listing or to one that has sold."""
         # ['Lions','Tigers','Bears','Foo','Bar']
+        def tag_query():
+            return Category.objects.filter(
+                Q(listing__isnull=True) | Q(listing__sold=True)
+            )
         tag_objs = self.generate_tags()
         self.listing1.tags.add(tag_objs[0])
         self.listing1.tags.add(tag_objs[1])
 
         self.listing2.tags.add(tag_objs[2])
         self.listing2.sold = True
-              
-        del_tags = listmng.cleantags(True)
-        self.assertListEqual(del_tags, ['Foo','Bar'])
+        
+        self.assertEqual(2, len(tag_query()))
+        listmng.cleantags()
+        self.assertEqual(0, len(tag_query()))
+
+    
+    def test_validate_listing_query(self):
+        request = Mock()
+        request.user = self.u2 
+        
+        request.POST = {"id":"2"}
+        listing = listmng.validate_listing_query(request)
+        self.assertEqual(listing, self.listing2)
 
 
 

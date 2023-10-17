@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponseRedirect
-from django.http import HttpResponseNotFound, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import HttpResponseNotFound, HttpResponseBadRequest, HttpResponseNotAllowed, Http404
 from django.urls import reverse
 from django import forms
 from django.db.models import Q
@@ -27,7 +27,10 @@ class CreateListingForm(ListingForm):
 
 @require_GET
 def viewlisting(request):
-    listing = Listing.objects.get(id=request.GET.get("id"))
+    try:
+        listing = Listing.objects.get(id=request.GET['id'])
+    except:
+        raise Http404("Listing not found.")
     tags = Category.objects.filter(listing=listing)
     comments = Comment.objects.filter(listing=listing)
 
@@ -53,10 +56,8 @@ def createlisting(request):
         seller_id = user
 
         if not imgurl:
-            imgurl = '/static/auctions/product-placeholder.jpg'
+            imgurl = "/static/auctions/product-placeholder.jpg"
         startbid = round(float(startbid), 2)
-
-        tags = tags.split(',')
 
         try:
             listing = Listing.objects.create(
@@ -71,16 +72,7 @@ def createlisting(request):
 
             user.selling_num += 1
             user.save()
-
-            for val in tags:
-                val = val.strip()
-                if not val:
-                    continue
-                val = val.capitalize()
-                tag, was_created = Category.objects.get_or_create(keyword=val)
-
-                listing.tags.add(tag)
-
+            tag_str_to_db(tags, listing)
 
         except IntegrityError:
             render(request, 'auctions/createlisting.html', {
@@ -163,12 +155,15 @@ def updatelisting(request):
     listing.description = request.POST["description"]
     listing.imgurl = request.POST["imgurl"]
 
+    if not imgurl:
+        imgurl = "/static/auctions/product-placeholder.jpg"
+
     tags = request.POST["tags"]
 
     try:
         listing.save()
-
         tag_str_to_db(tags, listing)
+        cleantags()
 
     except IntegrityError:
         render(request, 'auctions/createlisting.html', {
@@ -201,11 +196,8 @@ def placebid(request):
     return HttpResponseRedirect(f"{reverse('viewlisting')}?id={listing.id}")
 
 
-def tag_str_to_db(tags:str, listing:object, testing=False):
+def tag_str_to_db(tags:str, listing:object):
     tags = tags.split(',')
-
-    if testing:
-        created_tags:[str] = []
 
     for val in tags:
         val = val.strip()
@@ -215,31 +207,17 @@ def tag_str_to_db(tags:str, listing:object, testing=False):
         tag, was_created = Category.objects.get_or_create(keyword=val)
         listing.tags.add(tag)
 
-        if testing:
-            created_tags.append(tag.__str__())
 
-    cleantags()
-
-    if testing:
-        return created_tags
-
-
-def cleantags(testing=False) -> None:
+def cleantags() -> None:
     """Executed on listing update, delete, or accept.
     Purges tags in 'Category' that are no longer used"""
     unused_tags = Category.objects.filter(Q(listing__isnull=True) | Q(listing__sold=True))
     for _tag in unused_tags:
         _tag.delete()
 
-    if testing:
-        deleted_tags = []
-        for _tag in unused_tags:
-            deleted_tags.append(_tag.__str__())
-        return deleted_tags
-
 
 def validate_listing_query(request) -> object: 
-    """For validating a listing"""
+    """For validating a user is the owner of a listing"""
     try:
         list_id = request.POST["id"]
         if not list_id:
@@ -250,6 +228,8 @@ def validate_listing_query(request) -> object:
     except KeyError:
         return HttpResponseBadRequest('<h1>400 Incorrect URL Parameters</h1>')
     
+    if listing.seller != request.user:
+        return HttpResponseNotAllowed("<h1>405 You are not the owner of this listing</h1>")
     return listing
 
 
