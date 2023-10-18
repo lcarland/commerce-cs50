@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getAlerts() {
         const resp = await fetch("/user/get_alerts");
         const alerts = await resp.json();
-        notifier.innerHTML = `: ${alerts.num}`;
+        notifier.innerHTML = `${alerts.num}`;
     }
 
     getAlerts();

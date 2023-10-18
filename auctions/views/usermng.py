@@ -75,17 +75,17 @@ def rmv_from_watch(request):
 
 @login_required
 def inbox(request):
+    user = request.user
+    user.newalerts = 0
+    user.save()
     return render(request, 'auctions/user/notifications.html', {
-        'notifications': Notification.objects.filter(user=request.user).order_by("-time")
+        'notifications': Notification.objects.filter(user=user).order_by("-time")
     })
 
 
 @login_required
 def get_alerts(request):
-    user = request.user
-    alerts = user.newalerts
-    user.newalerts = 0
-    user.save()
+    alerts = request.user.newalerts
     return JsonResponse({
         'num': alerts
     })
