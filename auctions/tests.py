@@ -7,8 +7,11 @@ from auctions.views import listmng
 from .models import Listing, User, Category, Bid
 
 
+
+
 # Create your tests here.
 class ModelTest(TestCase):
+
     def setUp(self) -> None:
         self.u1 = User.objects.create_user("user1", "user1@email.com", "1234")
         self.u2 = User.objects.create_user("user2", "user2@email.com", "123456")
@@ -148,6 +151,32 @@ class ModelTest(TestCase):
             {"oper": "accept", "id": id})
         self.assertEqual(302, resp.status_code)
         self.assertTemplateUsed('auctions/user/viewuser.html')
+
+
+    def test_placebid(self):
+        """Test bid is created for listing by user, listing references all bids, 
+        user cannot place bid on their own listing, bid must be higher than current price."""
+        newlist3 = Listing.objects.create(
+            title="Product 2547", seller=self.u2,
+            description="enter description here", imgurl="https://www.image2.com",
+            startbid=14.00, price=14.00
+        )
+
+        self.client.login(username="user1", password="1234")
+        self.client.post(reverse('placebid'), {
+            'id': newlist3.id, 'bid': '14.46'
+        }) 
+        self.assertEqual(14.46, Listing.objects.get(title='Product 2547').winningbid.amount)
+
+        resp = self.client.post(reverse('placebid'), {
+            'id': self.listing1.id, 'bid': '14.46'
+        }) 
+        self.assertEqual(resp.status_code, 405)
+
+        resp = self.client.post(reverse('placebid'), {
+            'id': newlist3.id, 'bid': '13.50'
+        })
+        self.assertEqual(resp.status_code, 400)
 
 
     def test_tag_str_to_db(self):
