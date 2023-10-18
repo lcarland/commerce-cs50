@@ -1,0 +1,17 @@
+{% extends 'auctions/user/layout.html' %}
+
+
+<!-- 
+    Context
+    notifications: QuerySet
+ -->
+{% block userbody %}
+
+<h4>Inbox</h4>
+<hr>
+{% for msg in notifications %}
+    <b>{{msg.time}} {{msg.sender}}</b>
+    <p>{{msg.message}}</p>
+    <hr>
+{% endfor %}
+{% endblock %}

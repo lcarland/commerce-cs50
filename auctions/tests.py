@@ -4,9 +4,9 @@ from django.db.models import Q
 from unittest.mock import patch, Mock
 
 from auctions.views import listmng
-from .models import Listing, User, Category, Bid
+from .models import Listing, User, Category, Bid, Notification
 
-
+import json
 
 
 # Create your tests here.
@@ -226,6 +226,12 @@ class ModelTest(TestCase):
         request.POST = {"a": "2"}
         self.assertEqual(400, listmng.validate_listing_query(request).status_code)
 
+
+    def test_alerts(self):
+        self.client.login(username='user1', password='1234')
+        Notification.objects.create(user=self.u1, sender='user2', message="Hello, World")
+        resp = self.client.get(reverse('get_alerts'))   
+        self.assertEqual(resp.json(), {'num': 1})
 
 
 

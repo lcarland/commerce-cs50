@@ -20,5 +20,7 @@ urlpatterns = [
     path("user/comments", usermng.usercomments, name="usercomments"),
     path("user/postcomment", usermng.postcomment, name="postcomment"),
     path('user/watchlist', usermng.watchlist, name="watchlist"),
-    path("user/remove_from_watchlist", usermng.rmv_from_watch, name="rmv_from_watch")
+    path("user/remove_from_watchlist", usermng.rmv_from_watch, name="rmv_from_watch"),
+    path('user/inbox', usermng.inbox, name='inbox'),
+    path('user/get_alerts', usermng.get_alerts, name='get_alerts')
 ]

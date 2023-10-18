@@ -10,6 +10,7 @@ class User(AbstractUser):
     id = models.AutoField(primary_key=True)
     # User info inherited from AbstractUser
     watching = models.ManyToManyField('Listing')
+    newalerts = models.IntegerField(default=0)
     selling_num = models.IntegerField(default=0)
     sold_num = models.IntegerField(default=0)
     earnings = models.FloatField(default=0)
@@ -27,6 +28,7 @@ class Notification(models.Model):
     ie: listing sold, won bid, new comment, watchlist change"""
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.CharField(max_length=64, default="SysAdmin")
     time = models.DateTimeField(auto_now_add=True)
     message = models.CharField(max_length=500)
 

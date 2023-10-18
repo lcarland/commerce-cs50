@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 
 from ..models import Listing, Category, Bid, Comment
+from .usermng import make_notification
 
 
 class ListingForm(forms.Form):
@@ -115,6 +116,8 @@ def listing_operation(request):
         user.sold_num += 1
         user.save()
         cleantags()
+        make_notification('Site', user, f"Accepted bid of ${listing.price} for '{listing.title}'")
+        make_notification('Site', listing.user, f"You have won the auction for '{listing.title}'")
 
     elif operation == 'edit':
         tag_objs = Category.objects.filter(listing=listing)
@@ -132,6 +135,7 @@ def listing_operation(request):
         user.selling_num -= 1
         user.save()
         cleantags()
+        make_notification('Site', user, f"You removed the listing for '{listing.title}'")
 
     else:
         return HttpResponseBadRequest("<h1>400 Bad Request</h1>")
@@ -188,6 +192,7 @@ def placebid(request):
         listing.price = bid.amount 
         listing.winningbid = bid
         listing.save()
+        make_notification('Site', user, f"You bid on '{listing.title}' for ${bid.amount}")
     else:
         return HttpResponseBadRequest('<h1>400 The bid amount is too low</h1>')
     return HttpResponseRedirect(f"{reverse('viewlisting')}?id={listing.id}")

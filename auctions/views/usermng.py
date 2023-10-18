@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect 
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
-from ..models import Listing, Bid, Comment
+from ..models import User, Listing, Bid, Comment, Notification
 
 
 @login_required
@@ -71,3 +71,28 @@ def rmv_from_watch(request):
     user = request.user
     user.watching.remove(listing)
     return HttpResponseRedirect(f"{reverse('viewlisting')}?id={listing.id}")
+
+
+@login_required
+def inbox(request):
+    return render(request, 'auctions/user/notifications.html', {
+        'notifications': Notification.objects.filter(user=request.user).order_by("-time")
+    })
+
+
+@login_required
+def get_alerts(request):
+    user = request.user
+    alerts = user.newalerts
+    user.newalerts = 0
+    user.save()
+    return JsonResponse({
+        'num': alerts
+    })
+
+
+def make_notification(sender:str, receiver:User, content:str):
+    newMSG = Notification.objects.create(user=receiver, sender=sender, message=content)
+    receiver.newalerts += 1
+    newMSG.save()
+    receiver.save()
